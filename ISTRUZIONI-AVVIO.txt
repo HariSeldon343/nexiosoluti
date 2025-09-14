@@ -1,0 +1,131 @@
+================================================================================
+           NEXIOSOLUTION - ISTRUZIONI PER AVVIO COMPLETO
+================================================================================
+
+REQUISITI PRELIMINARI:
+----------------------
+1. XAMPP installato in C:\xampp
+2. Apache e MySQL avviati da XAMPP Control Panel
+3. Node.js installato (scarica da https://nodejs.org se mancante)
+
+================================================================================
+AVVIO RAPIDO (METODO CONSIGLIATO):
+================================================================================
+
+1. DOPPIO CLICK su: AVVIA-NEXIOSOLUTION.bat
+
+   Questo script farà TUTTO automaticamente:
+   - Verificherà i prerequisiti
+   - Installerà le dipendenze
+   - Configurerà il database
+   - Avvierà backend e frontend
+   - Aprirà il browser
+
+2. ATTENDERE che si apra il browser su http://localhost:3000
+
+3. ACCEDERE con:
+   Email: admin@nexiosolution.local
+   Password: Admin@123
+
+================================================================================
+AVVIO MANUALE (SE IL METODO RAPIDO NON FUNZIONA):
+================================================================================
+
+BACKEND LARAVEL:
+----------------
+1. Apri CMD come amministratore
+2. cd C:\xampp\htdocs\Nexiosolution\backend
+3. composer install
+4. copy .env.example .env
+5. php artisan key:generate
+6. Crea database "nexiosolution" in phpMyAdmin
+7. php artisan migrate --seed
+8. php artisan serve --port=8000
+
+FRONTEND REACT:
+---------------
+1. Apri NUOVO CMD
+2. cd C:\xampp\htdocs\Nexiosolution\frontend
+3. npm install --legacy-peer-deps
+4. npm run dev
+
+================================================================================
+RISOLUZIONE PROBLEMI:
+================================================================================
+
+ERRORE: "composer non è riconosciuto"
+--------------------------------------
+SOLUZIONE:
+1. Scarica https://getcomposer.org/Composer-Setup.exe
+2. Installa selezionando PHP da C:\xampp\php\php.exe
+3. Riavvia CMD
+
+ERRORE: "npm non è riconosciuto"
+---------------------------------
+SOLUZIONE:
+1. Scarica Node.js da https://nodejs.org
+2. Installa versione LTS
+3. Riavvia il computer
+
+ERRORE: "Porta 3000 già in uso"
+--------------------------------
+SOLUZIONE:
+1. Esegui STOP-NEXIOSOLUTION.bat
+2. Riprova con AVVIA-NEXIOSOLUTION.bat
+
+ERRORE: "Database nexiosolution non esiste"
+--------------------------------------------
+SOLUZIONE:
+1. Apri phpMyAdmin (http://localhost/phpmyadmin)
+2. Crea nuovo database chiamato "nexiosolution"
+3. Riprova
+
+ERRORE: Frontend non si avvia
+------------------------------
+SOLUZIONE:
+1. cd C:\xampp\htdocs\Nexiosolution\frontend
+2. Cancella cartella node_modules
+3. npm cache clean --force
+4. npm install --legacy-peer-deps --force
+5. npm run dev
+
+================================================================================
+VERIFICA STATO SISTEMA:
+================================================================================
+
+Esegui: CHECK-NEXIOSOLUTION.bat
+
+Questo mostrerà:
+- Stato di tutti i componenti
+- Servizi attivi
+- Eventuali problemi
+- Suggerimenti per risolverli
+
+================================================================================
+PER FERMARE TUTTO:
+================================================================================
+
+Esegui: STOP-NEXIOSOLUTION.bat
+
+================================================================================
+URL PRINCIPALI:
+================================================================================
+
+Frontend React:     http://localhost:3000
+Backend API:        http://localhost:8000
+phpMyAdmin:         http://localhost/phpmyadmin
+API Documentation:  http://localhost:8000/api/documentation
+
+================================================================================
+SUPPORTO:
+================================================================================
+
+Se continui ad avere problemi:
+
+1. Esegui CHECK-NEXIOSOLUTION.bat
+2. Salva il report generato
+3. Controlla i log in:
+   - backend/storage/logs/laravel.log
+   - Console del browser (F12)
+
+================================================================================

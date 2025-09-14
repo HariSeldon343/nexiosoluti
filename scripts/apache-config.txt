@@ -1,0 +1,91 @@
+# ====================================================
+# Configurazione Apache per NexioSolution
+# ====================================================
+#
+# ISTRUZIONI:
+# 1. Apri il file: C:\xampp\apache\conf\extra\httpd-vhosts.conf
+# 2. Aggiungi questa configurazione alla fine del file
+# 3. Salva il file
+# 4. Riavvia Apache dal XAMPP Control Panel
+#
+# ====================================================
+
+# VirtualHost per NexioSolution Backend (Laravel)
+<VirtualHost *:80>
+    ServerName nexiosolution.local
+    ServerAlias api.nexiosolution.local
+    DocumentRoot "C:/xampp/htdocs/Nexiosolution/backend/public"
+
+    <Directory "C:/xampp/htdocs/Nexiosolution/backend/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+
+        # Abilita mod_rewrite per Laravel
+        RewriteEngine On
+
+        # Gestisci Front Controller
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^ index.php [L]
+
+        # Headers per CORS (se necessario)
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    </Directory>
+
+    # Log personalizzati
+    ErrorLog "logs/nexiosolution-error.log"
+    CustomLog "logs/nexiosolution-access.log" common
+</VirtualHost>
+
+# VirtualHost alternativo su porta 8080 (opzionale)
+Listen 8080
+<VirtualHost *:8080>
+    ServerName localhost
+    DocumentRoot "C:/xampp/htdocs/Nexiosolution/backend/public"
+
+    <Directory "C:/xampp/htdocs/Nexiosolution/backend/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+# ====================================================
+# CONFIGURAZIONI AGGIUNTIVE DA VERIFICARE
+# ====================================================
+#
+# 1. Nel file C:\xampp\apache\conf\httpd.conf assicurati che:
+#
+#    a) Il modulo rewrite sia abilitato (rimuovi # all'inizio):
+#       LoadModule rewrite_module modules/mod_rewrite.so
+#
+#    b) Il modulo headers sia abilitato (per CORS):
+#       LoadModule headers_module modules/mod_headers.so
+#
+#    c) Include per vhosts sia abilitato:
+#       Include conf/extra/httpd-vhosts.conf
+#
+# 2. Nel file C:\Windows\System32\drivers\etc\hosts aggiungi:
+#    127.0.0.1    nexiosolution.local
+#    127.0.0.1    api.nexiosolution.local
+#
+# 3. Configurazione PHP (C:\xampp\php\php.ini):
+#    memory_limit = 256M
+#    upload_max_filesize = 64M
+#    post_max_size = 64M
+#    max_execution_time = 300
+#
+# ====================================================
+# URLS DOPO LA CONFIGURAZIONE:
+# ====================================================
+#
+# • Backend API (con VirtualHost):  http://nexiosolution.local
+# • Backend API (alternativo):       http://localhost:8080
+# • Backend API (Laravel serve):     http://localhost:8000
+# • Frontend React:                  http://localhost:3000
+# • phpMyAdmin:                     http://localhost/phpmyadmin
+#
+# ====================================================

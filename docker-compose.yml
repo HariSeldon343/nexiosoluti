@@ -1,0 +1,378 @@
+version: '3.8'
+
+# Configurazione Docker Compose per NexioSolution
+# Ambiente completo con tutti i servizi necessari
+
+services:
+  # Applicazione Laravel PHP-FPM
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: nexiosolution/app:latest
+    container_name: nexiosolution_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - nexiosolution
+    depends_on:
+      - db
+      - redis
+    environment:
+      - SERVICE_NAME=app
+      - SERVICE_TAGS=dev
+      - PHP_OPCACHE_ENABLE=1
+      - PHP_OPCACHE_MEMORY=256
+      - PHP_MEMORY_LIMIT=512M
+      - PHP_MAX_EXECUTION_TIME=300
+      - PHP_POST_MAX_SIZE=100M
+      - PHP_UPLOAD_MAX_FILESIZE=100M
+
+  # Web Server Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: nexiosolution_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - nexiosolution
+    depends_on:
+      - app
+    environment:
+      - NGINX_HOST=nexiosolution.local
+      - NGINX_PORT=80
+
+  # Database MariaDB
+  db:
+    image: mariadb:10.11
+    container_name: nexiosolution_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-nexiosolution}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_USER: ${DB_USERNAME:-nexiouser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-nexiopass}
+      MYSQL_CHARACTER_SET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - nexiosolution
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis Cache e Queue
+  redis:
+    image: redis:7-alpine
+    container_name: nexiosolution_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redispass}
+    volumes:
+      - redisdata:/data
+    networks:
+      - nexiosolution
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Laravel WebSockets
+  websockets:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.websockets
+    image: nexiosolution/websockets:latest
+    container_name: nexiosolution_websockets
+    restart: unless-stopped
+    ports:
+      - "6001:6001"
+    volumes:
+      - ./backend:/var/www/html
+    networks:
+      - nexiosolution
+    depends_on:
+      - redis
+      - db
+    command: php artisan websockets:serve
+
+  # Queue Worker
+  queue:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: nexiosolution/queue:latest
+    container_name: nexiosolution_queue
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/html
+    networks:
+      - nexiosolution
+    depends_on:
+      - redis
+      - db
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+
+  # Scheduler (Cron)
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: nexiosolution/scheduler:latest
+    container_name: nexiosolution_scheduler
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/html
+    networks:
+      - nexiosolution
+    depends_on:
+      - db
+      - redis
+    command: /bin/sh -c "while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"
+
+  # OnlyOffice Document Server (Opzionale)
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: nexiosolution_onlyoffice
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - onlyoffice_data:/var/www/onlyoffice/Data
+      - onlyoffice_logs:/var/log/onlyoffice
+      - ./docker/onlyoffice/local.json:/etc/onlyoffice/documentserver/local.json
+    networks:
+      - nexiosolution
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=${ONLYOFFICE_JWT_SECRET:-mysecretkey}
+      - JWT_HEADER=Authorization
+      - JWT_IN_BODY=true
+      - USE_UNAUTHORIZED_STORAGE=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Mailhog per test email in sviluppo
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: nexiosolution_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - nexiosolution
+    logging:
+      driver: "none"
+
+  # PHPMyAdmin per gestione database
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: nexiosolution_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      UPLOAD_LIMIT: 100M
+    networks:
+      - nexiosolution
+    depends_on:
+      - db
+
+  # Redis Commander per gestione Redis
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: nexiosolution_redis_commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:${REDIS_PASSWORD:-redispass}
+    networks:
+      - nexiosolution
+    depends_on:
+      - redis
+
+  # Node.js per build frontend
+  node:
+    image: node:18-alpine
+    container_name: nexiosolution_node
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    networks:
+      - nexiosolution
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+      - "5173:5173"  # Vite dev server
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+
+  # Elasticsearch per ricerca avanzata (Opzionale)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: nexiosolution_elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - nexiosolution
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Kibana per visualizzazione logs (Opzionale)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: nexiosolution_kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - nexiosolution
+    depends_on:
+      - elasticsearch
+
+  # MinIO per storage S3-compatible (Opzionale)
+  minio:
+    image: minio/minio:latest
+    container_name: nexiosolution_minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    networks:
+      - nexiosolution
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Backup Service
+  backup:
+    image: offen/docker-volume-backup:latest
+    container_name: nexiosolution_backup
+    restart: unless-stopped
+    environment:
+      BACKUP_SOURCES: /backup/db,/backup/uploads
+      BACKUP_CRON_EXPRESSION: "0 2 * * *"  # Backup alle 2 AM ogni giorno
+      BACKUP_RETENTION_DAYS: "7"
+      BACKUP_FILENAME: "nexiosolution-backup-%Y-%m-%d_%H-%M-%S.tar.gz"
+      AWS_S3_BUCKET_NAME: ${BACKUP_S3_BUCKET}
+      AWS_ACCESS_KEY_ID: ${BACKUP_AWS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${BACKUP_AWS_SECRET_KEY}
+    volumes:
+      - dbdata:/backup/db:ro
+      - ./backend/storage/app/public:/backup/uploads:ro
+      - ./backups:/archive
+    networks:
+      - nexiosolution
+
+  # Monitoring con Prometheus (Opzionale)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nexiosolution_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - nexiosolution
+
+  # Grafana per dashboard monitoring (Opzionale)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexiosolution_grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - nexiosolution
+    depends_on:
+      - prometheus
+
+# Networks
+networks:
+  nexiosolution:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
+
+# Volumes
+volumes:
+  dbdata:
+    driver: local
+  redisdata:
+    driver: local
+  onlyoffice_data:
+    driver: local
+  onlyoffice_logs:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  minio_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
