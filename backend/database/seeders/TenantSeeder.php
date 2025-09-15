@@ -15,14 +15,12 @@ class TenantSeeder extends Seeder
     {
         // Demo tenant
         Tenant::create([
-            'id' => Str::uuid(),
-            'slug' => 'demo',
             'name' => 'Demo Tenant',
+            'subdomain' => 'demo',
             'domain' => 'demo.localhost',
-            'database' => 'nexiosolution',
-            'config' => [
-                'max_users' => 50,
-                'max_storage' => 10737418240, // 10GB
+            'primary_color' => '#1976d2',
+            'secondary_color' => '#1565c0',
+            'settings' => [
                 'features' => [
                     'calendar' => true,
                     'tasks' => true,
@@ -32,25 +30,23 @@ class TenantSeeder extends Seeder
                     'caldav' => true,
                     'two_factor' => true,
                 ],
-                'theme' => [
-                    'primary_color' => '#1976d2',
-                    'logo_url' => null,
-                ],
             ],
+            'max_users' => 50,
+            'max_storage_mb' => 10240, // 10GB
             'is_active' => true,
-            'trial_ends_at' => now()->addDays(30),
+            'subscription_expires_at' => now()->addDays(30),
+            'subscription_plan' => 'premium',
+            'contact_email' => 'demo@nexiosolution.com',
         ]);
 
         // Test tenant
         Tenant::create([
-            'id' => Str::uuid(),
-            'slug' => 'test',
             'name' => 'Test Company',
+            'subdomain' => 'test',
             'domain' => 'test.localhost',
-            'database' => 'nexiosolution',
-            'config' => [
-                'max_users' => 10,
-                'max_storage' => 1073741824, // 1GB
+            'primary_color' => '#4caf50',
+            'secondary_color' => '#388e3c',
+            'settings' => [
                 'features' => [
                     'calendar' => true,
                     'tasks' => true,
@@ -60,13 +56,13 @@ class TenantSeeder extends Seeder
                     'caldav' => false,
                     'two_factor' => false,
                 ],
-                'theme' => [
-                    'primary_color' => '#4caf50',
-                    'logo_url' => null,
-                ],
             ],
+            'max_users' => 10,
+            'max_storage_mb' => 1024, // 1GB
             'is_active' => true,
-            'trial_ends_at' => now()->addDays(14),
+            'subscription_expires_at' => now()->addDays(14),
+            'subscription_plan' => 'basic',
+            'contact_email' => 'test@nexiosolution.com',
         ]);
     }
 }

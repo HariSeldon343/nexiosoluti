@@ -21,7 +21,6 @@
         "spatie/laravel-activitylog": "^4.7",
         "intervention/image": "^2.7",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "barryvdh/laravel-cors": "^3.0",
         "laravel/telescope": "^4.14"
     },
     "require-dev": {

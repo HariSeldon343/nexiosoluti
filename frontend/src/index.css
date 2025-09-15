@@ -11,11 +11,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-gray-200;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 dark:bg-dark-background dark:text-gray-100;
+    @apply bg-gray-50 text-gray-900;
   }
 
   /* Scrollbar personalizzata */
@@ -25,22 +25,22 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800;
+    @apply bg-gray-100;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+    @apply bg-gray-400 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-500 dark:bg-gray-500;
+    @apply bg-gray-500;
   }
 }
 
 @layer components {
   /* Card Base */
   .card {
-    @apply bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm;
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
   }
 
   /* Button Base */

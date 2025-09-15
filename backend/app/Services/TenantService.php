@@ -46,7 +46,10 @@ class TenantService
      */
     public function getTenantId(): ?int
     {
-        return $this->tenant?->id ?? session('tenant_id');
+        if (app()->runningInConsole()) {
+            return $this->tenant?->id;
+        }
+        return $this->tenant?->id ?? (session() ? session('tenant_id') : null);
     }
 
     /**
@@ -54,7 +57,10 @@ class TenantService
      */
     public function hasTenant(): bool
     {
-        return $this->tenant !== null || session()->has('tenant_id');
+        if (app()->runningInConsole()) {
+            return $this->tenant !== null;
+        }
+        return $this->tenant !== null || (session() && session()->has('tenant_id'));
     }
 
     /**
@@ -63,7 +69,9 @@ class TenantService
     public function resetTenant(): void
     {
         $this->tenant = null;
-        session()->forget('tenant_id');
+        if (!app()->runningInConsole() && session()) {
+            session()->forget('tenant_id');
+        }
     }
 
     /**

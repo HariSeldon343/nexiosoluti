@@ -26,7 +26,6 @@ class AppServiceProvider extends ServiceProvider
         // Load custom configurations
         if ($this->app->environment('local')) {
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
-            $this->app->register(TelescopeServiceProvider::class);
         }
     }
 }

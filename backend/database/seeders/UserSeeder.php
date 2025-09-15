@@ -15,8 +15,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $demoTenant = Tenant::where('slug', 'demo')->first();
-        $testTenant = Tenant::where('slug', 'test')->first();
+        $demoTenant = Tenant::where('subdomain', 'demo')->first();
+        $testTenant = Tenant::where('subdomain', 'test')->first();
 
         // Super Admin per Demo Tenant
         $superAdmin = User::create([
@@ -38,6 +38,27 @@ class UserSeeder extends Seeder
             ],
         ]);
         $superAdmin->assignRole('super-admin');
+
+        // Admin Demo per Frontend
+        $adminDemo = User::create([
+            'id' => Str::uuid(),
+            'tenant_id' => $demoTenant->id,
+            'name' => 'Admin Demo',
+            'email' => 'admin@nexiosolution.com',
+            'password' => Hash::make('password123'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+            'settings' => [
+                'language' => 'it',
+                'timezone' => 'Europe/Rome',
+                'notifications' => [
+                    'email' => true,
+                    'push' => true,
+                    'sms' => false,
+                ],
+            ],
+        ]);
+        $adminDemo->assignRole('admin');
 
         // Admin per Demo Tenant
         $admin = User::create([

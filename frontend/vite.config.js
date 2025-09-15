@@ -9,6 +9,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      manifestFilename: 'manifest.json',
       manifest: {
         name: 'NexioSolution',
         short_name: 'Nexio',
@@ -99,19 +100,13 @@ export default defineConfig({
   server: {
     host: 'localhost',
     port: 3000,
+    strictPort: true,  // IMPORTANTE: fallisce se porta occupata invece di usarne un'altra
     open: true,
-    strictPort: false,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        secure: false,
         rewrite: (path) => path
-      },
-      '/ws': {
-        target: 'ws://localhost:6001',
-        ws: true,
-        changeOrigin: true
       }
     }
   },

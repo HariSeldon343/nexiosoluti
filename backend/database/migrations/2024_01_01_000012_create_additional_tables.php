@@ -220,19 +220,7 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
         });
 
-        // Tabella personal access tokens (per API)
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('tokenable');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
-            $table->timestamps();
-
-            $table->index(['tokenable_type', 'tokenable_id']);
-        });
+        // Note: personal_access_tokens table is already created by Laravel Sanctum migration
     }
 
     /**
@@ -240,7 +228,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('personal_access_tokens');
+        // Note: personal_access_tokens table is managed by Laravel Sanctum
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('failed_jobs');

@@ -4,12 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "dev:win": "vite --host localhost --port 3000",
+    "dev": "vite --host --port 3000",
+    "start": "vite --host --port 3000",
     "build": "vite build",
+    "preview": "vite preview --host --port 4173",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "serve": "vite preview --host localhost --port 3000",
     "clean": "rm -rf node_modules dist",
     "reinstall": "npm run clean && npm install"
   },

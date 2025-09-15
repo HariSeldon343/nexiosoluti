@@ -29,15 +29,16 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { useAuthStore } from '../stores/authStore';
+import { useAuth } from '../contexts/AuthContext';
+import MainLayout from '../components/layout/MainLayout';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 /**
  * Dashboard principale con widget statistiche e grafici
  */
-const Dashboard = () => {
-  const { user } = useAuthStore();
+const DashboardContent = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     users: 156,
     documents: 1234,
@@ -413,6 +414,16 @@ const Dashboard = () => {
         </motion.div>
       </div>
     </motion.div>
+  );
+};
+
+const Dashboard = () => {
+  return (
+    <MainLayout>
+      <div className="p-6">
+        <DashboardContent />
+      </div>
+    </MainLayout>
   );
 };
 

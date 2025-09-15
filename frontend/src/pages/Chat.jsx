@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Send, Paperclip, Smile, Phone, Video, MoreVertical, Search } from 'lucide-react';
+import MainLayout from '../components/layout/MainLayout';
 
 /**
  * Componente Chat placeholder
  */
-const Chat = () => {
+const ChatComponent = () => {
   const [message, setMessage] = useState('');
 
   return (
@@ -124,6 +125,14 @@ const Chat = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const Chat = () => {
+  return (
+    <MainLayout>
+      <ChatComponent />
+    </MainLayout>
   );
 };
 

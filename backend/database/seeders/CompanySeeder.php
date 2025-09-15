@@ -14,8 +14,8 @@ class CompanySeeder extends Seeder
      */
     public function run(): void
     {
-        $demoTenant = Tenant::where('slug', 'demo')->first();
-        $testTenant = Tenant::where('slug', 'test')->first();
+        $demoTenant = Tenant::where('subdomain', 'demo')->first();
+        $testTenant = Tenant::where('subdomain', 'test')->first();
 
         // Company principale per Demo Tenant
         Company::create([

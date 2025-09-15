@@ -1,0 +1,19 @@
+{
+  "name": "NexioSolution",
+  "short_name": "NexioSolution",
+  "description": "Piattaforma Collaborativa Multi-Tenant",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2563EB",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["business", "productivity"]
+}

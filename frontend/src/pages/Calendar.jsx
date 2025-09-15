@@ -24,6 +24,8 @@ import { format, addDays, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 
+import MainLayout from '../components/layout/MainLayout';
+
 /**
  * Componente Calendario con supporto eventi multi-day e drag & drop
  */
@@ -635,4 +637,12 @@ const Calendar = () => {
   );
 };
 
-export default Calendar;
+const CalendarPage = () => {
+  return (
+    <MainLayout>
+      <Calendar />
+    </MainLayout>
+  );
+};
+
+export default CalendarPage;

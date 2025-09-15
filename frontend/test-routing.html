@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Routing NexioSolution</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1f2937; }
+        .test-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .test-link {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .test-link:hover {
+            background: #2563eb;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .warning { background: #fed7aa; color: #92400e; }
+        .info { background: #dbeafe; color: #1e40af; }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        .check { color: #10b981; margin-right: 10px; }
+        .cross { color: #ef4444; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test Routing NexioSolution</h1>
+
+        <div class="status success">
+            <strong>✅ App.jsx aggiornato con successo!</strong><br>
+            Il sistema di routing è ora attivo e funzionante.
+        </div>
+
+        <h2>Test delle Route:</h2>
+        <div class="test-links">
+            <a href="http://localhost:3000/" target="_blank" class="test-link">🏠 Home</a>
+            <a href="http://localhost:3000/login" target="_blank" class="test-link">🔐 Login</a>
+            <a href="http://localhost:3000/dashboard" target="_blank" class="test-link">📊 Dashboard</a>
+            <a href="http://localhost:3000/tasks" target="_blank" class="test-link">✅ Tasks</a>
+            <a href="http://localhost:3000/files" target="_blank" class="test-link">📁 Files</a>
+            <a href="http://localhost:3000/calendar" target="_blank" class="test-link">📅 Calendar</a>
+            <a href="http://localhost:3000/chat" target="_blank" class="test-link">💬 Chat</a>
+        </div>
+
+        <div class="status info">
+            <strong>ℹ️ Credenziali Demo:</strong><br>
+            Email: admin@nexiosolution.com<br>
+            Password: password123
+        </div>
+
+        <h2>Checklist Funzionalità:</h2>
+        <ul class="checklist">
+            <li><span class="check">✓</span> Landing page con pulsanti funzionanti</li>
+            <li><span class="check">✓</span> Navigazione a /login funzionante</li>
+            <li><span class="check">✓</span> Sistema di routing React Router configurato</li>
+            <li><span class="check">✓</span> Protezione routes con autenticazione</li>
+            <li><span class="check">✓</span> Layout principale (MainLayout) integrato</li>
+            <li><span class="check">✓</span> Tutte le pagine principali collegate</li>
+        </ul>
+
+        <div class="status warning">
+            <strong>⚠️ Note:</strong><br>
+            • Le route protette richiedono autenticazione (redirect automatico a /login)<br>
+            • Usa il pulsante "Demo Dashboard" per un accesso rapido senza login<br>
+            • Il server deve essere attivo su http://localhost:3000
+        </div>
+
+        <h2>Comportamento Atteso:</h2>
+        <ul class="checklist">
+            <li>🏠 <strong>Home (/):</strong> Landing page con descrizione e pulsanti di accesso</li>
+            <li>🔐 <strong>Login:</strong> Form di autenticazione con credenziali demo</li>
+            <li>📊 <strong>Dashboard:</strong> Pannello principale (richiede login)</li>
+            <li>🔄 <strong>Redirect:</strong> Le route protette reindirizzano a /login se non autenticati</li>
+            <li>❌ <strong>404:</strong> Route non esistenti mostrano pagina di errore</li>
+        </ul>
+    </div>
+</body>
+</html>

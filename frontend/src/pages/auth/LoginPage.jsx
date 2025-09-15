@@ -276,15 +276,19 @@ const LoginPage = () => {
             </form>
           )}
 
-          {/* Link registrazione */}
+          {/* Enterprise Platform Notice */}
           {!requires2FA && (
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Non hai un account?{' '}
-                <Link to="/register" className="font-medium text-primary hover:text-primary-600">
-                  Registrati
-                </Link>
-              </p>
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start">
+                <AlertCircle className="text-blue-600 dark:text-blue-400 mt-0.5 mr-2" size={20} />
+                <div className="text-sm">
+                  <p className="font-semibold text-blue-900 dark:text-blue-200 mb-1">Piattaforma Aziendale</p>
+                  <p className="text-blue-700 dark:text-blue-300">
+                    Questa è una piattaforma riservata. Solo gli amministratori possono creare nuovi utenti.
+                    Se hai bisogno di un account, contatta il tuo amministratore di sistema.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
