@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auth Status Codes - Nexio Collabora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .test-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #111827;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .status-200 { background: #10B981; color: white; }
+        .status-400 { background: #F59E0B; color: white; }
+        .status-401 { background: #EF4444; color: white; }
+        .status-404 { background: #6B7280; color: white; }
+        .status-500 { background: #DC2626; color: white; }
+
+        .test-description {
+            color: #6B7280;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .code-block {
+            background: #1F2937;
+            color: #F9FAFB;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.75rem 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-label {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #9CA3AF;
+        }
+
+        button {
+            background: #2563EB;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #1D4ED8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        button:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-box {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            min-height: 100px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .result-success { border-left: 4px solid #10B981; background: #F0FDF4; }
+        .result-error { border-left: 4px solid #EF4444; background: #FEF2F2; }
+        .result-warning { border-left: 4px solid #F59E0B; background: #FFFBEB; }
+
+        .section-header {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-header h2 {
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            padding: 0.75rem;
+            background: #F9FAFB;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .console-output {
+            background: #111827;
+            color: #10B981;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .console-line {
+            margin: 0.25rem 0;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .error-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 500px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .error-display.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test Authentication Status Codes</h1>
+
+        <div class="section-header">
+            <h2>Configuration</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">API Endpoint</div>
+                    <div class="info-value" id="apiEndpoint">/collabora/api/auth_simple.php</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Current Time</div>
+                    <div class="info-value" id="currentTime"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Test Mode</div>
+                    <div class="info-value">Development</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Credentials</div>
+                    <div class="info-value">Include</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-grid">
+            <!-- Test 1: Successful Login (200) -->
+            <div class="test-card">
+                <h2>✅ Successful Login</h2>
+                <span class="status-badge status-200">200 OK</span>
+                <p class="test-description">
+                    Test with valid credentials. Should return user data, tenants, and session ID.
+                </p>
+                <div class="code-block">
+                    <span class="code-label">Request</span>
+{
+  "action": "login",
+  "email": "asamodeo@fortibyte.it",
+  "password": "Ricord@1991"
+}
+                </div>
+                <button onclick="testSuccessfulLogin()">Run Test</button>
+                <div id="result-200" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 2: Missing Fields (400) -->
+            <div class="test-card">
+                <h2>⚠️ Missing Email Field</h2>
+                <span class="status-badge status-400">400 Bad Request</span>
+                <p class="test-description">
+                    Test with missing email field. Should return error with fields array containing ["email"].
+                </p>
+                <div class="code-block">
+                    <span class="code-label">Request</span>
+{
+  "action": "login",
+  "password": "somepassword"
+}
+                </div>
+                <button onclick="testMissingEmail()">Run Test</button>
+                <div id="result-400-email" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 3: Invalid Credentials (401) -->
+            <div class="test-card">
+                <h2>❌ Invalid Credentials</h2>
+                <span class="status-badge status-401">401 Unauthorized</span>
+                <p class="test-description">
+                    Test with wrong password. Should return "Credenziali non valide" message.
+                </p>
+                <div class="code-block">
+                    <span class="code-label">Request</span>
+{
+  "action": "login",
+  "email": "asamodeo@fortibyte.it",
+  "password": "WrongPassword123"
+}
+                </div>
+                <button onclick="testInvalidCredentials()">Run Test</button>
+                <div id="result-401" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 4: Missing Action (400) -->
+            <div class="test-card">
+                <h2>⚠️ Missing Action Field</h2>
+                <span class="status-badge status-400">400 Bad Request</span>
+                <p class="test-description">
+                    Test without action field. Should return error indicating action is required.
+                </p>
+                <div class="code-block">
+                    <span class="code-label">Request</span>
+{
+  "email": "asamodeo@fortibyte.it",
+  "password": "Ricord@1991"
+}
+                </div>
+                <button onclick="testMissingAction()">Run Test</button>
+                <div id="result-400-action" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 5: Invalid JSON (400) -->
+            <div class="test-card">
+                <h2>⚠️ Invalid JSON Format</h2>
+                <span class="status-badge status-400">400 Bad Request</span>
+                <p class="test-description">
+                    Test with malformed JSON. Should return error about invalid JSON format.
+                </p>
+                <div class="code-block">
+                    <span class="code-label">Request</span>
+{
+  "action": "login",
+  "email": "test@example.com"
+  // Missing closing brace
+                </div>
+                <button onclick="testInvalidJSON()">Run Test</button>
+                <div id="result-400-json" class="result-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 6: Empty Body (400) -->
+            <div class="test-card">
+                <h2>⚠️ Empty Request Body</h2>
+                <span class="status-badge status-400">400 Bad Request</span>
+                <p class="test-description">
+                    Test with empty request body. Should return error about empty body.
+                </p>
+                <div class="code-block">
+                    <span class="code-label">Request</span>
+// Empty body
+                </div>
+                <button onclick="testEmptyBody()">Run Test</button>
+                <div id="result-400-empty" class="result-box" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Console Output -->
+        <div class="section-header" style="margin-top: 2rem;">
+            <h2>Console Output</h2>
+            <div class="console-output" id="console"></div>
+        </div>
+    </div>
+
+    <!-- Error Display Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="error-display" id="errorModal">
+        <h3 id="errorTitle">Error</h3>
+        <p id="errorMessage"></p>
+        <button onclick="closeErrorModal()">Close</button>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.protocol + '//' + window.location.host + '/Nexiosolution/collabora/api';
+
+        // Update current time
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleString('it-IT');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Console logger
+        function logToConsole(message, type = 'info') {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
+            line.textContent = `[${timestamp}] ${icon} ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Error modal
+        function showErrorModal(title, message) {
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        // Make API request
+        async function makeRequest(payload, testId) {
+            const resultDiv = document.getElementById(testId);
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Loading...';
+            resultDiv.className = 'result-box';
+
+            try {
+                logToConsole(`Sending request to ${API_BASE}/auth_simple.php`);
+
+                const response = await fetch(`${API_BASE}/auth_simple.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: typeof payload === 'string' ? payload : JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => ({ error: 'Failed to parse JSON' }));
+
+                // Log status
+                logToConsole(`Response: ${response.status} ${response.statusText}`, response.ok ? 'info' : 'error');
+
+                // Display result
+                const resultClass = response.status === 200 ? 'result-success' :
+                                   response.status === 401 ? 'result-error' : 'result-warning';
+
+                resultDiv.className = `result-box ${resultClass}`;
+                resultDiv.textContent = `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+
+                // Check expectations
+                if (testId === 'result-200' && response.status === 200) {
+                    logToConsole('✅ Test passed: Successful login');
+                } else if (testId === 'result-400-email' && response.status === 400) {
+                    if (data.error?.fields?.includes('email')) {
+                        logToConsole('✅ Test passed: Missing email detected');
+                    } else {
+                        logToConsole('⚠️ Test issue: Missing email field not in error.fields', 'warning');
+                    }
+                } else if (testId === 'result-401' && response.status === 401) {
+                    logToConsole('✅ Test passed: Invalid credentials detected');
+                } else if (testId === 'result-400-action' && response.status === 400) {
+                    if (data.error?.fields?.includes('action')) {
+                        logToConsole('✅ Test passed: Missing action detected');
+                    } else {
+                        logToConsole('⚠️ Test issue: Missing action field not in error.fields', 'warning');
+                    }
+                } else if (testId === 'result-400-json' && response.status === 400) {
+                    if (data.error?.code === 'invalid_json') {
+                        logToConsole('✅ Test passed: Invalid JSON detected');
+                    } else {
+                        logToConsole('⚠️ Test issue: Invalid JSON not properly detected', 'warning');
+                    }
+                } else if (testId === 'result-400-empty' && response.status === 400) {
+                    if (data.error?.code === 'empty_body' || data.error?.code === 'no_data') {
+                        logToConsole('✅ Test passed: Empty body detected');
+                    } else {
+                        logToConsole('⚠️ Test issue: Empty body not properly detected', 'warning');
+                    }
+                }
+
+                return { response, data };
+            } catch (error) {
+                logToConsole(`Network error: ${error.message}`, 'error');
+                resultDiv.className = 'result-box result-error';
+                resultDiv.textContent = `Network Error:\n${error.message}`;
+                showErrorModal('Network Error', error.message);
+            }
+        }
+
+        // Test functions
+        function testSuccessfulLogin() {
+            makeRequest({
+                action: 'login',
+                email: 'asamodeo@fortibyte.it',
+                password: 'Ricord@1991'
+            }, 'result-200');
+        }
+
+        function testMissingEmail() {
+            makeRequest({
+                action: 'login',
+                password: 'somepassword'
+            }, 'result-400-email');
+        }
+
+        function testInvalidCredentials() {
+            makeRequest({
+                action: 'login',
+                email: 'asamodeo@fortibyte.it',
+                password: 'WrongPassword123'
+            }, 'result-401');
+        }
+
+        function testMissingAction() {
+            makeRequest({
+                email: 'asamodeo@fortibyte.it',
+                password: 'Ricord@1991'
+            }, 'result-400-action');
+        }
+
+        function testInvalidJSON() {
+            // Send malformed JSON as string
+            makeRequest('{"action": "login", "email": "test@example.com"', 'result-400-json');
+        }
+
+        function testEmptyBody() {
+            makeRequest('', 'result-400-empty');
+        }
+
+        // Run all tests
+        function runAllTests() {
+            logToConsole('Starting all tests...', 'info');
+            setTimeout(() => testSuccessfulLogin(), 100);
+            setTimeout(() => testMissingEmail(), 600);
+            setTimeout(() => testInvalidCredentials(), 1100);
+            setTimeout(() => testMissingAction(), 1600);
+            setTimeout(() => testInvalidJSON(), 2100);
+            setTimeout(() => testEmptyBody(), 2600);
+        }
+
+        // Initial log
+        logToConsole('Test page loaded. Ready to test authentication endpoints.');
+        logToConsole(`API Endpoint: ${API_BASE}/auth_simple.php`);
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+
+# Sicurezza Nexio Solution V2
+Options -Indexes
+Options -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /Nexiosolution/collabora/
+
+    # Blocca accesso a file sensibili
+    RewriteRule ^(config|install|test).*\.php$ - [F,L]
+    RewriteRule ^\. - [F,L]
+
+    # Reindirizza tutto a index_v2.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/v2/(.*)$ api/v2/index.php?route=$1 [QSA,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index_v2.php [L]
+</IfModule>
+
+# Sicurezza headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>

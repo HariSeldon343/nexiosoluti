@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Post-Login Flow - Nexio Collabora</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #111827;
+            border-bottom: 2px solid #4f46e5;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #374151;
+            margin-top: 30px;
+        }
+
+        .test-section {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+
+        .test-button {
+            padding: 8px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .test-button:hover {
+            background: #4338ca;
+        }
+
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .result.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .validation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .validation-card {
+            padding: 15px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+
+        .validation-card h3 {
+            margin-top: 0;
+            color: #4b5563;
+            font-size: 16px;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.success {
+            background: #10b981;
+        }
+
+        .status-indicator.error {
+            background: #ef4444;
+        }
+
+        .status-indicator.pending {
+            background: #f59e0b;
+        }
+
+        .login-form-test {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .login-button:hover {
+            background: #4338ca;
+        }
+
+        .debug-log {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-time {
+            color: #6b7280;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Post-Login Flow</h1>
+
+        <p style="color: #6b7280;">
+            Questa pagina testa il sistema di redirect post-login per verificare che funzioni in modo deterministico e sicuro.
+        </p>
+
+        <!-- Configuration Display -->
+        <div class="test-section">
+            <h2>Configurazione Corrente</h2>
+            <div id="config-display" class="result info"></div>
+        </div>
+
+        <!-- Validation Tests -->
+        <div class="test-section">
+            <h2>Test di Validazione URL</h2>
+            <div class="validation-grid">
+                <div class="validation-card">
+                    <h3>Test URL Validi</h3>
+                    <div id="valid-tests"></div>
+                </div>
+                <div class="validation-card">
+                    <h3>Test URL Non Validi</h3>
+                    <div id="invalid-tests"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom URL Test -->
+        <div class="test-section">
+            <h2>Test URL Personalizzato</h2>
+            <div class="input-group">
+                <label for="custom-url">Inserisci un URL da testare:</label>
+                <input type="text" id="custom-url" placeholder="es. /Nexiosolution/collabora/dashboard.php">
+            </div>
+            <button class="test-button" onclick="testCustomUrl()">Test Validazione</button>
+            <div id="custom-result"></div>
+        </div>
+
+        <!-- Login Form Test -->
+        <div class="test-section">
+            <h2>Test Login con Redirect</h2>
+            <div class="login-form-test">
+                <div class="input-group">
+                    <label>Test con parametro 'next':</label>
+                    <select id="next-param" class="login-input">
+                        <option value="">Nessun parametro next</option>
+                        <option value="#calendar">Hash valido: #calendar</option>
+                        <option value="/Nexiosolution/collabora/files.php">Path valido: files.php</option>
+                        <option value="https://external.com">URL esterno (non valido)</option>
+                        <option value="../../../etc/passwd">Directory traversal (non valido)</option>
+                        <option value="javascript:alert('xss')">JavaScript injection (non valido)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="test-email" class="login-input" placeholder="Email" value="asamodeo@fortibyte.it">
+                    <input type="password" id="test-password" class="login-input" placeholder="Password" value="Ricord@1991">
+                </div>
+                <button class="login-button" onclick="testLogin()">Test Login</button>
+            </div>
+            <div id="login-result"></div>
+        </div>
+
+        <!-- Debug Log -->
+        <div class="test-section">
+            <h2>Debug Log</h2>
+            <div id="debug-log" class="debug-log"></div>
+            <button class="test-button" onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="assets/js/post-login-config.js"></script>
+    <script src="assets/js/post-login-handler.js"></script>
+
+    <script>
+        // Initialize debug log
+        const debugLog = [];
+
+        function addToLog(message, data = null) {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = {
+                time,
+                message,
+                data
+            };
+            debugLog.push(logEntry);
+            updateLogDisplay();
+        }
+
+        function updateLogDisplay() {
+            const logContainer = document.getElementById('debug-log');
+            logContainer.innerHTML = debugLog.map(entry => {
+                let html = `<div class="log-entry">`;
+                html += `<span class="log-time">[${entry.time}]</span>`;
+                html += `<span>${entry.message}</span>`;
+                if (entry.data) {
+                    html += `<br><span style="margin-left: 100px; color: #93c5fd;">${JSON.stringify(entry.data)}</span>`;
+                }
+                html += `</div>`;
+                return html;
+            }).join('');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            debugLog.length = 0;
+            updateLogDisplay();
+        }
+
+        // Display current configuration
+        function displayConfig() {
+            const configDisplay = document.getElementById('config-display');
+            const config = {
+                'Default Redirect': PostLoginConfig.POST_LOGIN_DEFAULT,
+                'SPA Mode': PostLoginConfig.ENABLE_SPA_MODE ? 'Enabled' : 'Disabled',
+                'Debug Mode': PostLoginConfig.DEBUG_MODE.enabled ? 'Enabled' : 'Disabled',
+                'Required Path Component': PostLoginConfig.REDIRECT_RULES.requiredPathComponent,
+                'Allowed Redirects Count': PostLoginConfig.ALLOWED_REDIRECTS.length
+            };
+
+            configDisplay.innerHTML = Object.entries(config).map(([key, value]) =>
+                `<strong>${key}:</strong> ${value}`
+            ).join('<br>');
+
+            addToLog('Configuration loaded', config);
+        }
+
+        // Run validation tests
+        function runValidationTests() {
+            const validTests = [
+                '/Nexiosolution/collabora/dashboard.php',
+                '/Nexiosolution/collabora/home_v2.php',
+                '#calendar',
+                '#tasks',
+                '/Nexiosolution/collabora/admin/index.php'
+            ];
+
+            const invalidTests = [
+                'https://external.com',
+                'http://malicious.com',
+                'javascript:alert("xss")',
+                '../../../etc/passwd',
+                '/etc/passwd',
+                'data:text/html,<script>alert(1)</script>'
+            ];
+
+            // Test valid URLs
+            const validContainer = document.getElementById('valid-tests');
+            validContainer.innerHTML = validTests.map(url => {
+                const result = PostLoginHandler.validateRedirectTarget(url);
+                const statusClass = result.valid ? 'success' : 'error';
+                const statusIcon = result.valid ? '✓' : '✗';
+
+                addToLog(`Testing valid URL: ${url}`, result);
+
+                return `
+                    <div class="test-item">
+                        <span>${url}</span>
+                        <span class="status-indicator ${statusClass}"></span>
+                        <span>${statusIcon}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Test invalid URLs
+            const invalidContainer = document.getElementById('invalid-tests');
+            invalidContainer.innerHTML = invalidTests.map(url => {
+                const result = PostLoginHandler.validateRedirectTarget(url);
+                const statusClass = result.valid ? 'error' : 'success';
+                const statusIcon = result.valid ? '✗' : '✓';
+
+                addToLog(`Testing invalid URL: ${url}`, result);
+
+                return `
+                    <div class="test-item">
+                        <span>${url}</span>
+                        <span class="status-indicator ${statusClass}"></span>
+                        <span>${statusIcon} ${result.reason}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Test custom URL
+        function testCustomUrl() {
+            const url = document.getElementById('custom-url').value;
+            const result = PostLoginHandler.validateRedirectTarget(url);
+            const resultContainer = document.getElementById('custom-result');
+
+            addToLog(`Custom URL test: ${url}`, result);
+
+            resultContainer.className = `result ${result.valid ? 'success' : 'error'}`;
+            resultContainer.innerHTML = `
+                <strong>URL:</strong> ${url}<br>
+                <strong>Valid:</strong> ${result.valid}<br>
+                <strong>Reason:</strong> ${result.reason}
+            `;
+        }
+
+        // Test login with redirect
+        async function testLogin() {
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            const nextParam = document.getElementById('next-param').value;
+            const resultContainer = document.getElementById('login-result');
+
+            // Update URL with next parameter if provided
+            const currentUrl = new URL(window.location.href);
+            if (nextParam) {
+                currentUrl.searchParams.set('next', nextParam);
+                window.history.replaceState({}, '', currentUrl);
+                addToLog('Set next parameter', nextParam);
+            } else {
+                currentUrl.searchParams.delete('next');
+                window.history.replaceState({}, '', currentUrl);
+                addToLog('Removed next parameter');
+            }
+
+            try {
+                addToLog('Starting login test', { email, hasNextParam: !!nextParam });
+
+                // Simulate login API call
+                const response = await fetch('api/auth_simple.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                addToLog('Login response', data);
+
+                if (data.success) {
+                    // Get redirect target
+                    const redirectTarget = PostLoginHandler.getRedirectTarget(data);
+
+                    addToLog('Redirect decision', {
+                        target: redirectTarget,
+                        serverSuggestion: data.redirect,
+                        nextParam: nextParam
+                    });
+
+                    resultContainer.className = 'result success';
+                    resultContainer.innerHTML = `
+                        <strong>Login Successful!</strong><br>
+                        <strong>User:</strong> ${data.user.email}<br>
+                        <strong>Role:</strong> ${data.user.role}<br>
+                        <strong>Server Suggested Redirect:</strong> ${data.redirect || 'none'}<br>
+                        <strong>Next Parameter:</strong> ${nextParam || 'none'}<br>
+                        <strong>Final Redirect Target:</strong> ${redirectTarget}<br>
+                        <strong>Validation:</strong> ${PostLoginHandler.validateRedirectTarget(redirectTarget).valid ? 'Valid' : 'Invalid'}<br>
+                        <br>
+                        <em>In production, the user would be redirected to: ${redirectTarget}</em>
+                    `;
+                } else {
+                    throw new Error(data.error?.message || 'Login failed');
+                }
+            } catch (error) {
+                addToLog('Login error', error.message);
+
+                resultContainer.className = 'result error';
+                resultContainer.innerHTML = `
+                    <strong>Login Failed!</strong><br>
+                    <strong>Error:</strong> ${error.message}
+                `;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            displayConfig();
+            runValidationTests();
+            addToLog('Test page initialized');
+        });
+    </script>
+</body>
+</html>

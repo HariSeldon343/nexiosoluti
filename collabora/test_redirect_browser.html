@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login Redirect - Browser</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #666;
+            font-size: 18px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-success { color: #4CAF50; }
+        .log-error { color: #f44336; }
+        .log-warning { color: #ff9800; }
+        .log-info { color: #2196F3; }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Login Redirect Test - Browser</h1>
+
+        <div class="test-section">
+            <h2>1. Configuration Check</h2>
+            <button onclick="checkConfiguration()">Check Configuration</button>
+            <div id="config-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Login Test</h2>
+            <label>Email:</label>
+            <input type="email" id="email" value="asamodeo@fortibyte.it">
+            <label>Password:</label>
+            <input type="password" id="password" value="Ricord@1991">
+            <br><br>
+            <button onclick="testLogin()">Test Login & Redirect</button>
+            <button onclick="checkSession()">Check Current Session</button>
+            <button onclick="logout()">Logout</button>
+            <div id="login-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Manual Navigation Test</h2>
+            <button onclick="window.location.href='index_v2.php'">Go to index_v2.php</button>
+            <button onclick="window.location.href='home_v2.php'">Go to home_v2.php</button>
+            <button onclick="window.location.href='dashboard.php'">Go to dashboard.php</button>
+            <button onclick="window.location.href='admin/index.php'">Go to admin/index.php</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Console Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="assets/js/api-config.js"></script>
+    <script src="assets/js/error-handler.js"></script>
+    <script src="assets/js/post-login-config.js"></script>
+    <script src="assets/js/post-login-handler.js"></script>
+
+    <script>
+        // Logging function
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+
+            // Also log to console
+            console.log(`[Test] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            log('Log cleared', 'info');
+        }
+
+        // Check configuration
+        async function checkConfiguration() {
+            log('Checking configuration...', 'info');
+            const statusDiv = document.getElementById('config-status');
+            statusDiv.innerHTML = '';
+
+            // Check if required modules are loaded
+            const modules = [
+                { name: 'APIConfig', loaded: typeof window.APIConfig !== 'undefined' },
+                { name: 'ErrorHandler', loaded: typeof window.ErrorHandler !== 'undefined' },
+                { name: 'PostLoginConfig', loaded: typeof window.PostLoginConfig !== 'undefined' },
+                { name: 'PostLoginHandler', loaded: typeof window.PostLoginHandler !== 'undefined' }
+            ];
+
+            let allLoaded = true;
+            modules.forEach(module => {
+                if (module.loaded) {
+                    log(`✓ ${module.name} is loaded`, 'success');
+                } else {
+                    log(`✗ ${module.name} is NOT loaded`, 'error');
+                    allLoaded = false;
+                }
+            });
+
+            // Check API configuration
+            if (window.APIConfig) {
+                const apiUrl = window.APIConfig.getApiBaseUrl();
+                log(`API Base URL: ${apiUrl}`, 'info');
+            }
+
+            // Check post-login configuration
+            if (window.PostLoginConfig) {
+                log(`Default redirect: ${window.PostLoginConfig.POST_LOGIN_DEFAULT}`, 'info');
+                log(`Debug mode: ${window.PostLoginConfig.DEBUG_MODE.enabled}`, 'info');
+            }
+
+            // Update status
+            if (allLoaded) {
+                statusDiv.innerHTML = '<div class="status success">✓ All modules loaded correctly</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="status error">✗ Some modules are missing</div>';
+            }
+        }
+
+        // Test login
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const statusDiv = document.getElementById('login-status');
+
+            log(`Testing login for: ${email}`, 'info');
+            statusDiv.innerHTML = '<div class="status warning">Logging in...</div>';
+
+            try {
+                // Get API URL
+                const apiUrl = window.APIConfig ?
+                    window.APIConfig.getApiBaseUrl() :
+                    '/Nexiosolution/collabora/api';
+
+                log(`Using API URL: ${apiUrl}/auth_simple.php`, 'info');
+
+                // Perform login
+                const response = await fetch(`${apiUrl}/auth_simple.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        action: 'login',
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                log(`Response status: ${response.status}`, response.status === 200 ? 'success' : 'error');
+                log(`Response data: ${JSON.stringify(data)}`, 'info');
+
+                if (response.status === 200 && data.success) {
+                    log('✓ Login successful!', 'success');
+
+                    // Log user info
+                    if (data.user) {
+                        log(`User: ${data.user.email} (${data.user.role})`, 'info');
+                    }
+
+                    // Log redirect info
+                    if (data.redirect) {
+                        log(`Server suggests redirect to: ${data.redirect}`, 'info');
+                    }
+
+                    statusDiv.innerHTML = '<div class="status success">✓ Login successful! Testing redirect...</div>';
+
+                    // Test PostLoginHandler
+                    if (window.PostLoginHandler) {
+                        log('PostLoginHandler is available, calling handlePostLogin()', 'info');
+
+                        // Override redirect to just log instead of actually navigating
+                        const originalNavigate = window.PostLoginHandler.postLoginNavigate;
+                        window.PostLoginHandler.postLoginNavigate = function(target) {
+                            log(`PostLoginHandler would redirect to: ${target}`, 'success');
+                            statusDiv.innerHTML += `<div class="status success">✓ Redirect target: ${target}</div>`;
+
+                            // Ask user if they want to actually redirect
+                            if (confirm(`Login successful! Redirect to ${target}?`)) {
+                                window.location.href = target;
+                            }
+                        };
+
+                        // Call the handler
+                        window.PostLoginHandler.handlePostLogin(data);
+
+                        // Restore original function
+                        window.PostLoginHandler.postLoginNavigate = originalNavigate;
+                    } else {
+                        log('PostLoginHandler not available!', 'error');
+                        statusDiv.innerHTML += '<div class="status error">✗ PostLoginHandler not loaded</div>';
+                    }
+
+                } else {
+                    log(`✗ Login failed: ${data.message || 'Unknown error'}`, 'error');
+                    statusDiv.innerHTML = `<div class="status error">✗ Login failed: ${data.message || 'Unknown error'}</div>`;
+                }
+
+            } catch (error) {
+                log(`✗ Error: ${error.message}`, 'error');
+                statusDiv.innerHTML = `<div class="status error">✗ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Check session
+        async function checkSession() {
+            log('Checking session status...', 'info');
+            const statusDiv = document.getElementById('login-status');
+
+            try {
+                const apiUrl = window.APIConfig ?
+                    window.APIConfig.getApiBaseUrl() :
+                    '/Nexiosolution/collabora/api';
+
+                const response = await fetch(`${apiUrl}/me.php`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                log(`Session check status: ${response.status}`, response.status === 200 ? 'success' : 'warning');
+
+                if (response.status === 200 && data.authenticated) {
+                    log(`✓ Authenticated as: ${data.user.email} (${data.user.role})`, 'success');
+                    statusDiv.innerHTML = `<div class="status success">✓ Logged in as: ${data.user.email}</div>`;
+                } else {
+                    log('✗ Not authenticated', 'warning');
+                    statusDiv.innerHTML = '<div class="status warning">Not logged in</div>';
+                }
+
+            } catch (error) {
+                log(`✗ Session check error: ${error.message}`, 'error');
+                statusDiv.innerHTML = `<div class="status error">✗ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Logout
+        async function logout() {
+            log('Logging out...', 'info');
+            window.location.href = 'index_v2.php?action=logout';
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Test page loaded', 'info');
+            log('Checking configuration automatically...', 'info');
+            setTimeout(checkConfiguration, 500);
+        });
+
+        // Override console.log to also show in our log
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            // Only capture PostLogin related messages
+            const message = args.join(' ');
+            if (message.includes('PostLogin') || message.includes('redirect') || message.includes('Login')) {
+                log(`[Console] ${message}`, 'info');
+            }
+        };
+    </script>
+</body>
+</html>

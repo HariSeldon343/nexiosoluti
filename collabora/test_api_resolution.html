@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Risoluzione Percorsi API - Nexiosolution Collabora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .test-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .test-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-testing {
+            background: #dbeafe;
+            color: #1e40af;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-card {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1f2937;
+            word-break: break-all;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .test-item {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .icon-pending {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .icon-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .icon-error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .login-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .input {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+
+        .log-container {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .log-info {
+            color: #60a5fa;
+        }
+
+        .log-success {
+            color: #34d399;
+        }
+
+        .log-error {
+            color: #f87171;
+        }
+
+        .log-warning {
+            color: #fbbf24;
+        }
+
+        .results-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .results-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .results-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .summary-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Test Risoluzione Percorsi API</h1>
+            <p>Sistema di verifica completo per Nexiosolution Collabora</p>
+        </div>
+
+        <!-- Informazioni Sistema -->
+        <div class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">📊 Informazioni Sistema</h2>
+                <span class="test-status status-pending" id="system-status">In attesa</span>
+            </div>
+            <div class="info-grid" id="system-info">
+                <div class="info-card">
+                    <div class="info-label">URL Base Rilevato</div>
+                    <div class="info-value" id="detected-base">Calcolo in corso...</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">URL API</div>
+                    <div class="info-value" id="api-url">Calcolo in corso...</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Percorso Script</div>
+                    <div class="info-value" id="script-path">Calcolo in corso...</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Protocollo</div>
+                    <div class="info-value" id="protocol">Calcolo in corso...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Percorsi API -->
+        <div class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">🛣️ Test Percorsi API</h2>
+                <span class="test-status status-pending" id="paths-status">In attesa</span>
+            </div>
+            <button class="btn btn-primary" onclick="testAPIPaths()">Avvia Test Percorsi</button>
+            <div class="test-grid" id="paths-tests"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="paths-progress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Test Login -->
+        <div class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">🔐 Test Autenticazione</h2>
+                <span class="test-status status-pending" id="auth-status">In attesa</span>
+            </div>
+            <div class="login-form">
+                <input type="email" id="login-email" class="input" placeholder="Email" value="admin@nexio.com">
+                <input type="password" id="login-password" class="input" placeholder="Password" value="admin123">
+                <button class="btn btn-primary" onclick="testLogin()">Test Login</button>
+            </div>
+            <div id="auth-result"></div>
+        </div>
+
+        <!-- Test Moduli API -->
+        <div class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">📦 Test Moduli API</h2>
+                <span class="test-status status-pending" id="modules-status">In attesa</span>
+            </div>
+            <button class="btn btn-primary" onclick="testAPIModules()" id="test-modules-btn" disabled>
+                Avvia Test Moduli (richiede login)
+            </button>
+            <table class="results-table" id="modules-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Modulo</th>
+                        <th>Endpoint</th>
+                        <th>Status</th>
+                        <th>Risposta</th>
+                        <th>Tempo (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="modules-results"></tbody>
+            </table>
+        </div>
+
+        <!-- Console Log -->
+        <div class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">📝 Console Log</h2>
+                <button class="btn btn-secondary" onclick="clearLog()">Pulisci</button>
+            </div>
+            <div class="log-container" id="console-log"></div>
+        </div>
+
+        <!-- Riepilogo -->
+        <div class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">📈 Riepilogo Test</h2>
+            </div>
+            <div class="summary-cards" id="summary">
+                <div class="summary-card">
+                    <div class="summary-number" id="total-tests">0</div>
+                    <div class="summary-label">Test Totali</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number" id="passed-tests" style="color: #10b981;">0</div>
+                    <div class="summary-label">Superati</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number" id="failed-tests" style="color: #ef4444;">0</div>
+                    <div class="summary-label">Falliti</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number" id="success-rate">0%</div>
+                    <div class="summary-label">Tasso Successo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabili globali
+        let baseUrl = '';
+        let apiUrl = '';
+        let authToken = null;
+        let testStats = {
+            total: 0,
+            passed: 0,
+            failed: 0
+        };
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            detectSystemInfo();
+            addLog('Sistema inizializzato', 'info');
+        });
+
+        // Rileva informazioni sistema
+        function detectSystemInfo() {
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const pathname = window.location.pathname;
+
+            // Calcola base URL
+            const pathParts = pathname.split('/');
+            pathParts.pop(); // Rimuovi il nome del file
+            const basePath = pathParts.join('/');
+
+            baseUrl = protocol + '//' + host + basePath;
+            apiUrl = baseUrl + '/api';
+
+            // Aggiorna UI
+            document.getElementById('detected-base').textContent = baseUrl;
+            document.getElementById('api-url').textContent = apiUrl;
+            document.getElementById('script-path').textContent = pathname;
+            document.getElementById('protocol').textContent = protocol;
+
+            document.getElementById('system-status').className = 'test-status status-success';
+            document.getElementById('system-status').textContent = 'Rilevato';
+
+            addLog(`Base URL rilevato: ${baseUrl}`, 'success');
+            addLog(`API URL: ${apiUrl}`, 'success');
+        }
+
+        // Test percorsi API
+        async function testAPIPaths() {
+            const statusEl = document.getElementById('paths-status');
+            const testsEl = document.getElementById('paths-tests');
+            const progressEl = document.getElementById('paths-progress');
+
+            statusEl.className = 'test-status status-testing';
+            statusEl.textContent = 'Test in corso...';
+            testsEl.innerHTML = '';
+
+            const endpoints = [
+                { name: 'auth_v2.php', path: '/api/auth_v2.php' },
+                { name: 'auth_simple.php', path: '/api/auth_simple.php' },
+                { name: 'users.php', path: '/api/users.php' },
+                { name: 'tenants.php', path: '/api/tenants.php' },
+                { name: 'files.php', path: '/api/files.php' },
+                { name: 'folders.php', path: '/api/folders.php' },
+                { name: 'webdav.php', path: '/api/webdav.php' },
+                { name: 'webhooks.php', path: '/api/webhooks.php' }
+            ];
+
+            let completed = 0;
+            let passed = 0;
+
+            for (const endpoint of endpoints) {
+                const testItem = document.createElement('div');
+                testItem.className = 'test-item';
+                testItem.innerHTML = `
+                    <div class="test-icon icon-pending">⏳</div>
+                    <span>${endpoint.name}</span>
+                `;
+                testsEl.appendChild(testItem);
+
+                try {
+                    const response = await fetch(baseUrl + endpoint.path, {
+                        method: 'OPTIONS',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok || response.status === 405 || response.status === 401) {
+                        testItem.querySelector('.test-icon').className = 'test-icon icon-success';
+                        testItem.querySelector('.test-icon').textContent = '✓';
+                        addLog(`✓ ${endpoint.name} raggiungibile (${response.status})`, 'success');
+                        passed++;
+                        updateTestStats('passed');
+                    } else {
+                        throw new Error(`Status ${response.status}`);
+                    }
+                } catch (error) {
+                    testItem.querySelector('.test-icon').className = 'test-icon icon-error';
+                    testItem.querySelector('.test-icon').textContent = '✗';
+                    addLog(`✗ ${endpoint.name} non raggiungibile: ${error.message}`, 'error');
+                    updateTestStats('failed');
+                }
+
+                completed++;
+                progressEl.style.width = ((completed / endpoints.length) * 100) + '%';
+            }
+
+            if (passed === endpoints.length) {
+                statusEl.className = 'test-status status-success';
+                statusEl.textContent = 'Tutti superati';
+            } else {
+                statusEl.className = 'test-status status-error';
+                statusEl.textContent = `${passed}/${endpoints.length} superati`;
+            }
+        }
+
+        // Test login
+        async function testLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const statusEl = document.getElementById('auth-status');
+            const resultEl = document.getElementById('auth-result');
+
+            if (!email || !password) {
+                alert('Inserisci email e password');
+                return;
+            }
+
+            statusEl.className = 'test-status status-testing';
+            statusEl.textContent = 'Autenticazione...';
+
+            addLog(`Tentativo login con: ${email}`, 'info');
+
+            try {
+                const response = await fetch(baseUrl + '/api/auth_v2.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    authToken = data.token;
+                    statusEl.className = 'test-status status-success';
+                    statusEl.textContent = 'Autenticato';
+
+                    resultEl.innerHTML = `
+                        <div class="info-card" style="margin-top: 15px; border-left-color: #10b981;">
+                            <div class="info-label">Login riuscito!</div>
+                            <div class="info-value">Utente: ${data.user.name || email}</div>
+                            <div class="info-value" style="font-size: 0.8rem; margin-top: 5px;">
+                                Token: ${authToken.substring(0, 20)}...
+                            </div>
+                        </div>
+                    `;
+
+                    // Abilita test moduli
+                    document.getElementById('test-modules-btn').disabled = false;
+                    document.getElementById('test-modules-btn').textContent = 'Avvia Test Moduli';
+
+                    addLog('✓ Login riuscito', 'success');
+                    updateTestStats('passed');
+                } else {
+                    throw new Error(data.message || 'Login fallito');
+                }
+            } catch (error) {
+                statusEl.className = 'test-status status-error';
+                statusEl.textContent = 'Errore';
+
+                resultEl.innerHTML = `
+                    <div class="info-card" style="margin-top: 15px; border-left-color: #ef4444;">
+                        <div class="info-label">Login fallito</div>
+                        <div class="info-value">${error.message}</div>
+                    </div>
+                `;
+
+                addLog(`✗ Login fallito: ${error.message}`, 'error');
+                updateTestStats('failed');
+            }
+        }
+
+        // Test moduli API
+        async function testAPIModules() {
+            if (!authToken) {
+                alert('Effettua prima il login');
+                return;
+            }
+
+            const statusEl = document.getElementById('modules-status');
+            const tableEl = document.getElementById('modules-table');
+            const resultsEl = document.getElementById('modules-results');
+
+            statusEl.className = 'test-status status-testing';
+            statusEl.textContent = 'Test in corso...';
+            tableEl.style.display = 'table';
+            resultsEl.innerHTML = '';
+
+            const modules = [
+                { name: 'Utenti', endpoint: '/api/users.php', method: 'GET' },
+                { name: 'Tenant', endpoint: '/api/tenants.php', method: 'GET' },
+                { name: 'File', endpoint: '/api/files.php', method: 'GET' },
+                { name: 'Cartelle', endpoint: '/api/folders.php', method: 'GET' },
+                { name: 'WebDAV Info', endpoint: '/api/webdav.php', method: 'GET' },
+                { name: 'Webhooks', endpoint: '/api/webhooks.php', method: 'GET' }
+            ];
+
+            let allPassed = true;
+
+            for (const module of modules) {
+                const row = document.createElement('tr');
+                const startTime = Date.now();
+
+                try {
+                    const response = await fetch(baseUrl + module.endpoint, {
+                        method: module.method,
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const elapsed = Date.now() - startTime;
+                    const data = await response.json();
+
+                    const statusBadge = response.ok ?
+                        '<span class="badge badge-success">OK</span>' :
+                        '<span class="badge badge-error">ERRORE</span>';
+
+                    row.innerHTML = `
+                        <td>${module.name}</td>
+                        <td>${module.endpoint}</td>
+                        <td>${statusBadge} ${response.status}</td>
+                        <td>${data.message || data.error || 'OK'}</td>
+                        <td>${elapsed}</td>
+                    `;
+
+                    if (response.ok) {
+                        addLog(`✓ ${module.name}: ${response.status} (${elapsed}ms)`, 'success');
+                        updateTestStats('passed');
+                    } else {
+                        allPassed = false;
+                        addLog(`✗ ${module.name}: ${response.status}`, 'error');
+                        updateTestStats('failed');
+                    }
+                } catch (error) {
+                    allPassed = false;
+                    const elapsed = Date.now() - startTime;
+
+                    row.innerHTML = `
+                        <td>${module.name}</td>
+                        <td>${module.endpoint}</td>
+                        <td><span class="badge badge-error">ERRORE</span></td>
+                        <td>${error.message}</td>
+                        <td>${elapsed}</td>
+                    `;
+
+                    addLog(`✗ ${module.name}: ${error.message}`, 'error');
+                    updateTestStats('failed');
+                }
+
+                resultsEl.appendChild(row);
+            }
+
+            if (allPassed) {
+                statusEl.className = 'test-status status-success';
+                statusEl.textContent = 'Tutti superati';
+            } else {
+                statusEl.className = 'test-status status-error';
+                statusEl.textContent = 'Alcuni falliti';
+            }
+        }
+
+        // Aggiungi log
+        function addLog(message, type = 'info') {
+            const logEl = document.getElementById('console-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Pulisci log
+        function clearLog() {
+            document.getElementById('console-log').innerHTML = '';
+            addLog('Log pulito', 'info');
+        }
+
+        // Aggiorna statistiche
+        function updateTestStats(result) {
+            testStats.total++;
+            if (result === 'passed') {
+                testStats.passed++;
+            } else {
+                testStats.failed++;
+            }
+
+            document.getElementById('total-tests').textContent = testStats.total;
+            document.getElementById('passed-tests').textContent = testStats.passed;
+            document.getElementById('failed-tests').textContent = testStats.failed;
+
+            const successRate = testStats.total > 0 ?
+                Math.round((testStats.passed / testStats.total) * 100) : 0;
+            document.getElementById('success-rate').textContent = successRate + '%';
+        }
+
+        // Test da console
+        window.testAPIFromConsole = function() {
+            console.log('=== Test API da Console ===');
+            console.log('Base URL:', baseUrl);
+            console.log('API URL:', apiUrl);
+
+            // Test fetch
+            fetch(apiUrl + '/auth_v2.php', { method: 'OPTIONS' })
+                .then(response => {
+                    console.log('auth_v2.php status:', response.status);
+                    console.log('Headers:', Object.fromEntries(response.headers));
+                })
+                .catch(error => console.error('Errore:', error));
+
+            return 'Test avviato - controlla i risultati sopra';
+        };
+
+        // Esporta risultati
+        window.exportResults = function() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                system: {
+                    baseUrl: baseUrl,
+                    apiUrl: apiUrl,
+                    protocol: window.location.protocol,
+                    host: window.location.host
+                },
+                stats: testStats,
+                authToken: authToken ? 'presente' : 'assente'
+            };
+
+            console.log('Risultati test:', results);
+
+            // Download JSON
+            const blob = new Blob([JSON.stringify(results, null, 2)],
+                { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'test-results-' + Date.now() + '.json';
+            a.click();
+
+            return results;
+        };
+    </script>
+</body>
+</html>
